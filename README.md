@@ -1,2 +1,2 @@
-# WW_surveillance_of_SARS-CoV-2
-Custom pipeline used to analyse data reported in the manuscript
+# WW surveillance of SARS-CoV-2
+This repo contains the custom pipeline used to analyse data reported in the manuscript.
