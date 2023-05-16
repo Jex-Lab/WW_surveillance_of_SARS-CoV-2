@@ -1,2 +1,2 @@
 # WW surveillance of SARS-CoV-2
-This repo contains the custom pipeline used to analyse data reported in the manuscript.
+Data analysis pipeline used for SNP/SARS-CoV-2 variant detection in short-read NGS data generated from wastewater samples collected in Victoria, Australia.
