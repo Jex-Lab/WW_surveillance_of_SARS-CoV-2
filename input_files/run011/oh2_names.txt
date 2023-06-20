@@ -1,0 +1,12 @@
+fwd_3_rev_1.fastq
+fwd_3_rev_2.fastq
+fwd_3_rev_3.fastq
+fwd_3_rev_4.fastq
+fwd_3_rev_5.fastq
+fwd_3_rev_6.fastq
+fwd_3_rev_7.fastq
+fwd_3_rev_8.fastq
+fwd_3_rev_9.fastq
+fwd_3_rev_10.fastq
+fwd_3_rev_11.fastq
+fwd_3_rev_12.fastq
