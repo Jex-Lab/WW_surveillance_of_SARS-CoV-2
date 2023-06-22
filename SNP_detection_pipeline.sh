@@ -1,21 +1,3 @@
-#!/bin/sh
-
-#SBATCH --ntasks=1
-#SBATCH --job-name=covSNP
-#SBATCH --time=3:00:00
-#SBATCH --cpus-per-task=12
-#SBATCH --mem=12G
-#SBATCH --output=covSNP_%A_%a.out
-#SBATCH --mail-type=ALL
-#SBATCH --mail-user=user@wehi.edu.au
-
-module load cutadapt
-module load trimmomatic
-module load samtools
-module load bedtools
-module load gatk
-module load anaconda3
-
 ## ----------------------------- ##
 ## ------- SNP ANALYSIS -------- ##
 ## ----------------------------- ##
@@ -94,8 +76,6 @@ wait
 ##        GET OH1 5' READS       ##
 ## ----------------------------- ##
 
-source activate lofreq
-
 rm -r $FILEPATH/oh1_5
 mkdir $FILEPATH/oh1_5
 
@@ -119,8 +99,6 @@ seqkit grep $FILEPATH/oh1/${i} -s -P -r -p ^CAAATCGCTCCAGGGCAAAC --out-file $FIL
 done
 
 wait
-
-conda deactivate
 
 ## ----------------------------- ##
 ##   TRIM & FILTER OH1 5' READS  ##
@@ -168,8 +146,6 @@ wait
 ##        GET OH2 5' READS       ##
 ## ----------------------------- ##
 
-source activate lofreq
-
 rm -r $FILEPATH/oh2_5
 mkdir $FILEPATH/oh2_5
 
@@ -203,6 +179,8 @@ wait
 rm -r $FILEPATH/oh2_3_pd1
 mkdir $FILEPATH/oh2_3_pd1
 
+# primer dimers are rarely generated but it's better to be safe than sorry.
+
 for i in $(ls $FILEPATH/oh2_3/)
 do
 seqkit grep $FILEPATH/oh2_3/${i} -s -p TAACACACTGACTAGAGACTAGTGG -v --out-file $FILEPATH/oh2_3_pd1/${i}
@@ -219,8 +197,6 @@ seqkit grep $FILEPATH/oh2_3_pd1/${i} -s -p AGTAAAGCAGAGATCATTTAATTTAGTAGG -v --o
 done
 
 wait
-
-conda deactivate
 
 ## ----------------------------- ##
 ##   TRIM & FILTER OH2 5' READS  ##
@@ -255,8 +231,6 @@ wait
 ## ------------------------------##
 ##       REV COMP OH2 READS      ##
 ## ------------------------------##
-
-source activate lofreq
 
 rm -r $FILEPATH/oh2_5_rev
 mkdir $FILEPATH/oh2_5_rev
@@ -306,8 +280,6 @@ done
 
 wait
 
-conda deactivate
-
 ## ----------------------------- ##
 ##   SORT & INDEX MAPPED READS   ##
 ## ----------------------------- ##
@@ -347,8 +319,6 @@ wait
 ##     ADD INDEL QUALITY INFO    ##
 ## ----------------------------- ##
 
-source activate lofreq
-
 rm -r $FILEPATH/indelq
 mkdir $FILEPATH/indelq
 
@@ -358,8 +328,6 @@ lofreq indelqual $FILEPATH/sorted/${i}.sorted.bam --dindel -f $FILEPATH/masks/${
 done
 
 wait
-
-conda deactivate
 
 ## ----------------------------- ##
 ##            RE-INDEX           ##
@@ -376,18 +344,17 @@ wait
 ##        CALL VARIANTS          ##
 ## ----------------------------- ##
 
-source activate lofreq
-
 rm -r $FILEPATH/vcfs
 mkdir $FILEPATH/vcfs
 
+# number of samples to batch process as an alternative to call-parallel which doesn't always behave.
 N=10
 
 for i in ${names[@]}
 do
 ((j=j%N))
 ((j++==0)) && wait
-lofreq call-parallel --pp-threads 12 --call-indels -f $FILEPATH/masks/${i}.masked.fa -o $FILEPATH/vcfs/${i}.vcf $FILEPATH/indelq/${i}.indel.bam &
+lofreq call --call-indels -f $FILEPATH/masks/${i}.masked.fa -o $FILEPATH/vcfs/${i}.vcf $FILEPATH/indelq/${i}.indel.bam &
 done
 
 wait
@@ -405,8 +372,6 @@ lofreq filter -i $FILEPATH/vcfs/${i}.vcf -o $FILEPATH/filtered/${i}.filtered.vcf
 done
 
 wait
-
-conda deactivate
 
 ## ----------------------------- ##
 ##    SUMMARISE MUTATION DATA    ##
@@ -496,7 +461,7 @@ done < $FILEPATH/summary/all_samples.txt > $FILEPATH/summary/all_mutations.txt
 sed '-es/ /\//'{600..3..3} -i $FILEPATH/summary/all_mutations.txt
 
 # move final summary file into job directory.
-mv $FILEPATH/summary/all_mutations.txt $FILEPATH/summary/..
+mv $FILEPATH/summary/all_mutations.txt $FILEPATH/
 
 wait
 
