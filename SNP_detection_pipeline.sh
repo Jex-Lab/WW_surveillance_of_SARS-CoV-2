@@ -347,7 +347,7 @@ wait
 rm -r $FILEPATH/vcfs
 mkdir $FILEPATH/vcfs
 
-# number of samples to batch process as an alternative to call-parallel which doesn't always behave.
+# set the number of samples to batch process as an alternative to call-parallel which doesn't always behave.
 N=10
 
 for i in ${names[@]}
